@@ -10,7 +10,7 @@ const SignUp = () => {
   });
   const navigate = useNavigate();
   const [login, setLogin] = useState(false);
-  const url = "http://localhost:3000";
+  const url = "https://api.myexpensetracker.info";
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
