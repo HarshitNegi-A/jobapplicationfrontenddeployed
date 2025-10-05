@@ -14,7 +14,7 @@ const UserProfile = () => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/profile`, {
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFormData(res.data);
@@ -33,7 +33,7 @@ const UserProfile = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`${process.env.REACT_APP_BACKEND_URL}/profile`, formData, {
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/profile`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Profile updated successfully!");

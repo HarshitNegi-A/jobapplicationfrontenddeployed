@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = process.env.REACT_APP_BACKEND_URLL; // adjust if different
+const API = import.meta.env.VITE_BACKEND_URLL; // adjust if different
 
 const Applications = () => {
   const [apps, setApps] = useState([]);

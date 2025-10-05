@@ -10,7 +10,7 @@ const SignUp = () => {
   });
   const navigate = useNavigate();
   const [login, setLogin] = useState(false);
-  const url = process.env.REACT_APP_BACKEND_URL;
+  const url = import.meta.env.VITE_BACKEND_URL;
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
