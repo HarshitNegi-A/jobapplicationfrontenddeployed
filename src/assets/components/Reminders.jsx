@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = import.meta.env.VITE_BACKEND_URLL; // ✅ Use correct env variable (not VITE_BACKEND_URLL)
+const API = import.meta.env.VITE_BACKEND_URL; // ✅ corrected env variable
 
 const Reminders = () => {
   const [reminders, setReminders] = useState([]);
-  const [apps, setApps] = useState([]); // store applications
+  const [apps, setApps] = useState([]);
   const [form, setForm] = useState({
     applicationId: "",
     note: "",
@@ -30,7 +30,7 @@ const Reminders = () => {
     }
   };
 
-  // Fetch applications (for dropdown)
+  // Fetch applications
   const fetchApps = async () => {
     try {
       const res = await axios.get(`${API}/applications`, {
@@ -48,7 +48,7 @@ const Reminders = () => {
     fetchApps();
   }, []);
 
-  // Handle form change
+  // Handle input change
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -56,18 +56,28 @@ const Reminders = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      // 🕒 Convert local datetime (from datetime-local input) to ISO string with timezone info
-      const localDate = new Date(form.remindAt);
-      const isoDate = localDate.toISOString(); // Converts to UTC ISO format automatically
+    if (!form.remindAt) {
+      alert("Please select a date and time");
+      return;
+    }
 
+    // ✅ Convert to ISO (UTC)
+    const localDate = new Date(form.remindAt);
+    if (isNaN(localDate.getTime())) {
+      alert("Invalid date/time");
+      return;
+    }
+
+    const isoDate = localDate.toISOString();
+
+    try {
       await axios.post(
         `${API}/reminders`,
         { ...form, remindAt: isoDate },
         { headers: getAuthHeaders() }
       );
 
-      alert("Reminder added");
+      alert("Reminder added successfully");
       setForm({ applicationId: "", note: "", remindAt: "" });
       fetchReminders();
     } catch (err) {
@@ -76,13 +86,11 @@ const Reminders = () => {
     }
   };
 
-  // Delete reminder
+  // Delete
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this reminder?")) return;
     try {
-      await axios.delete(`${API}/reminders/${id}`, {
-        headers: getAuthHeaders(),
-      });
+      await axios.delete(`${API}/reminders/${id}`, { headers: getAuthHeaders() });
       fetchReminders();
     } catch (err) {
       console.error("deleteReminder", err);
@@ -90,14 +98,10 @@ const Reminders = () => {
     }
   };
 
-  // Dismiss reminder
+  // Dismiss
   const handleDismiss = async (id) => {
     try {
-      await axios.post(
-        `${API}/reminders/${id}/dismiss`,
-        {},
-        { headers: getAuthHeaders() }
-      );
+      await axios.post(`${API}/reminders/${id}/dismiss`, {}, { headers: getAuthHeaders() });
       fetchReminders();
     } catch (err) {
       console.error("dismissReminder", err);
@@ -105,15 +109,30 @@ const Reminders = () => {
     }
   };
 
-  // Find application details for a reminder
+  // Find app info
   const getAppInfo = (appId) => {
     const app = apps.find((a) => a.id === appId);
     if (!app) return { company: "Unknown Company", title: "Unknown Role" };
-
     return {
       company: app.Company?.name || app.company || "Unknown Company",
       title: app.title || "Unknown Role",
     };
+  };
+
+  // ✅ Format time safely
+  const formatRemindAt = (dateStr) => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "Invalid date";
+    return d.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   return (
@@ -132,7 +151,7 @@ const Reminders = () => {
             value={form.applicationId}
             onChange={handleChange}
             required
-            className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-200"
           >
             <option value="">Select Application</option>
             {apps.map((app) => (
@@ -151,7 +170,7 @@ const Reminders = () => {
             value={form.remindAt}
             onChange={handleChange}
             required
-            className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-200"
           />
         </label>
 
@@ -163,7 +182,7 @@ const Reminders = () => {
             placeholder="Reminder note"
             value={form.note}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-200"
           />
         </label>
 
@@ -176,9 +195,7 @@ const Reminders = () => {
           </button>
           <button
             type="button"
-            onClick={() =>
-              setForm({ applicationId: "", note: "", remindAt: "" })
-            }
+            onClick={() => setForm({ applicationId: "", note: "", remindAt: "" })}
             className="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
           >
             Reset
@@ -199,10 +216,7 @@ const Reminders = () => {
           {reminders.map((r) => {
             const appInfo = getAppInfo(r.applicationId);
             return (
-              <div
-                key={r.id}
-                className="border rounded-lg p-4 bg-white shadow-sm"
-              >
+              <div key={r.id} className="border rounded-lg p-4 bg-white shadow-sm">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-sm text-gray-600">
@@ -210,7 +224,7 @@ const Reminders = () => {
                       <span className="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-1 rounded mr-2">
                         {appInfo.company}
                       </span>
-                      <span className="text-gray-700">{appInfo.title}</span>
+                      {appInfo.title}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
                       <strong className="text-gray-800">Note:</strong>{" "}
@@ -218,15 +232,7 @@ const Reminders = () => {
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
                       <strong className="text-gray-800">Remind At:</strong>{" "}
-                      {new Date(r.remindAt).toLocaleString("en-IN", {
-                        timeZone: "Asia/Kolkata",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {formatRemindAt(r.remindAt)}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
                       <strong className="text-gray-800">Status:</strong>{" "}
@@ -241,7 +247,6 @@ const Reminders = () => {
                     >
                       Delete
                     </button>
-
                     {r.status === "pending" && (
                       <button
                         onClick={() => handleDismiss(r.id)}
