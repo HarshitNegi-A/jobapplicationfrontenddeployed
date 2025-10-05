@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = "http://localhost:3000/api";
+const API = process.env.REACT_APP_BACKEND_URLL;
 
 const Companies = () => {
   const [companies, setCompanies] = useState([]);

@@ -14,7 +14,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const API = "http://localhost:3000/api";
+const API = process.env.REACT_APP_BACKEND_URLL;
 
 const Dashboard = () => {
   const [statusData, setStatusData] = useState([]);

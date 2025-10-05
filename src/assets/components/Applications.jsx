@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = "http://localhost:3000/api"; // adjust if different
+const API = process.env.REACT_APP_BACKEND_URLL; // adjust if different
 
 const Applications = () => {
   const [apps, setApps] = useState([]);
@@ -13,7 +13,6 @@ const Applications = () => {
     status: "applied",
   });
   const [editingId, setEditingId] = useState(null);
-  const [file, setFile] = useState(null);
   const [filters, setFilters] = useState({ status: "", q: "" });
   const [noteInputs, setNoteInputs] = useState({}); // track note input per app
 
@@ -96,69 +95,6 @@ const Applications = () => {
     } catch (err) {
       console.error(err);
       alert("Delete failed");
-    }
-  };
-
-  const handleFileChange = (e) => setFile(e.target.files[0]);
-
-  const handleUploadResume = async (appId) => {
-    if (!file) {
-      alert("Select a file first");
-      return;
-    }
-
-    try {
-      const res = await axios.get(`${API}/applications/${appId}/resume/upload`, {
-        headers: getAuthHeaders(),
-      });
-
-      const { uploadUrl } = res.data;
-
-      await axios.put(uploadUrl, file, {
-        headers: { "Content-Type": file.type },
-      });
-
-      alert("Uploaded successfully!");
-      setFile(null);
-      fetchApps();
-    } catch (err) {
-      console.error("upload", err);
-      alert(err.response?.data?.message || "Upload failed");
-    }
-  };
-
-  const handleDownloadResume = async (appId, mode = "download") => {
-    try {
-      const res = await axios.get(
-        `${API}/applications/${appId}/resume/download`,
-        { headers: getAuthHeaders() }
-      );
-
-      const { downloadUrl, key } = res.data;
-      const fileName = key ? key.split("/").pop() : "resume.pdf";
-
-      if (mode === "open") {
-        window.open(downloadUrl, "_blank");
-        return;
-      }
-
-      const fileRes = await fetch(downloadUrl);
-      if (!fileRes.ok) throw new Error("Failed to fetch file");
-
-      const blob = await fileRes.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Download error:", err);
-      alert(err.response?.data?.message || "Download failed");
     }
   };
 
@@ -309,38 +245,6 @@ const Applications = () => {
                   Delete
                 </button>
               </div>
-            </div>
-
-            {/* File actions */}
-            <div className="mt-3 flex flex-wrap gap-2 items-center">
-              <input
-                type="file"
-                onChange={handleFileChange}
-                className="text-sm"
-              />
-              <button
-                onClick={() => handleUploadResume(app.id)}
-                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
-              >
-                Upload Resume
-              </button>
-
-              {app.resumeKey && (
-                <>
-                  <button
-                    onClick={() => handleDownloadResume(app.id)}
-                    className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm"
-                  >
-                    Download Resume
-                  </button>
-                  <button
-                    onClick={() => handleDownloadResume(app.id, "open")}
-                    className="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 text-sm"
-                  >
-                    Open Resume
-                  </button>
-                </>
-              )}
             </div>
 
             {/* Notes Section */}

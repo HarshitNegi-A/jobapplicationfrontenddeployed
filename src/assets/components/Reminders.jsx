@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = "http://localhost:3000/api"; // adjust if different
+const API = process.env.REACT_APP_BACKEND_URLL; // adjust if different
 
 const Reminders = () => {
   const [reminders, setReminders] = useState([]);

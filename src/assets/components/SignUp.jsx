@@ -10,11 +10,7 @@ const SignUp = () => {
   });
   const navigate = useNavigate();
   const [login, setLogin] = useState(false);
-<<<<<<< HEAD
-  const url = "http://myexpensetracker.info";
-=======
-  const url = "https://myexpensetracker.info";
->>>>>>> 74b5daa3a4196e8a7bfb627fed688851b59bbc18
+  const url = process.env.REACT_APP_BACKEND_URL;
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
