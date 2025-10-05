@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = import.meta.env.VITE_BACKEND_URLL; // adjust if different
+const API = import.meta.env.VITE_BACKEND_URL; // ✅ Use correct env variable (not VITE_BACKEND_URLL)
 
 const Reminders = () => {
   const [reminders, setReminders] = useState([]);
@@ -55,10 +55,18 @@ const Reminders = () => {
   // Submit reminder
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      await axios.post(`${API}/reminders`, form, {
-        headers: getAuthHeaders(),
-      });
+      // 🕒 Convert local datetime (from datetime-local input) to ISO string with timezone info
+      const localDate = new Date(form.remindAt);
+      const isoDate = localDate.toISOString(); // Converts to UTC ISO format automatically
+
+      await axios.post(
+        `${API}/reminders`,
+        { ...form, remindAt: isoDate },
+        { headers: getAuthHeaders() }
+      );
+
       alert("Reminder added");
       setForm({ applicationId: "", note: "", remindAt: "" });
       fetchReminders();
@@ -100,7 +108,7 @@ const Reminders = () => {
   // Find application details for a reminder
   const getAppInfo = (appId) => {
     const app = apps.find((a) => a.id === appId);
-    if (!app) return `App ID: ${appId}`;
+    if (!app) return { company: "Unknown Company", title: "Unknown Role" };
 
     return {
       company: app.Company?.name || app.company || "Unknown Company",
@@ -210,7 +218,15 @@ const Reminders = () => {
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
                       <strong className="text-gray-800">Remind At:</strong>{" "}
-                      {new Date(r.remindAt).toLocaleString()}
+                      {new Date(r.remindAt).toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
                       <strong className="text-gray-800">Status:</strong>{" "}
