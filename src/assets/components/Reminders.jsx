@@ -55,7 +55,8 @@ const Reminders = () => {
   // Submit reminder
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log("Frontend remindAt:", form.remindAt);
+    console.log("Frontend ISO being sent:", new Date(form.remindAt).toISOString());
     if (!form.remindAt) {
       alert("Please select a date and time");
       return;
