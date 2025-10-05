@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = import.meta.env.VITE_BACKEND_URL; // ✅ Use correct env variable (not VITE_BACKEND_URLL)
+const API = import.meta.env.VITE_BACKEND_URLL; // ✅ Use correct env variable (not VITE_BACKEND_URLL)
 
 const Reminders = () => {
   const [reminders, setReminders] = useState([]);
